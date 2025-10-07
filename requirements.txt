@@ -1,0 +1,5 @@
+pandas
+openpyxl
+pydantic
+fastapi
+uvicorn

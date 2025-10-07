@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digimon Evolution Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .current-digimon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .current-digimon h2 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-transform: capitalize;
+        }
+
+        .digimon-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .evolution-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .evolutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .evolution-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .evolution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            background: #e8eaff;
+        }
+
+        .evolution-card h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .evolution-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .stage, .number {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .stage {
+            color: #764ba2;
+        }
+
+        .number {
+            color: #667eea;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .arrow-icon {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Digimon Evolution Viewer</h1>
+        
+        <div class="search-section">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="digimonName" 
+                    placeholder="Ingresa el nombre del Digimon (ej: Sleipmon)"
+                    value="Sleipmon"
+                >
+                <button onclick="searchEvolutions()" id="searchBtn">Buscar Evoluciones</button>
+            </div>
+        </div>
+
+        <div id="errorContainer"></div>
+        <div id="loadingContainer"></div>
+        <div id="resultSection" class="result-section"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/evolution';
+
+        async function searchEvolutions() {
+            const digimonName = document.getElementById('digimonName').value.trim();
+            const errorContainer = document.getElementById('errorContainer');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const resultSection = document.getElementById('resultSection');
+            const searchBtn = document.getElementById('searchBtn');
+
+            errorContainer.innerHTML = '';
+            resultSection.innerHTML = '';
+            resultSection.classList.remove('show');
+
+            if (!digimonName) {
+                showError('Por favor ingresa el nombre de un Digimon');
+                return;
+            }
+
+            searchBtn.disabled = true;
+            loadingContainer.innerHTML = '<div class="loading">Cargando evoluciones</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/${digimonName}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
+                displayEvolutions(data);
+            } catch (error) {
+                showError(`Error al cargar las evoluciones: ${error.message}`);
+            } finally {
+                loadingContainer.innerHTML = '';
+                searchBtn.disabled = false;
+            }
+        }
+
+        function getStageLabel(stage) {
+            const stageMap = {
+                'I': 'Fresh (Baby I)',
+                'II': 'In-Training (Baby II)',
+                'III': 'Rookie (Child)',
+                'IV': 'Champion (Adult)',
+                'V': 'Ultimate (Perfect)',
+                'VI': 'Mega (Ultimate)',
+                '1': 'Fresh (Baby I)',
+                '2': 'In-Training (Baby II)',
+                '3': 'Rookie (Child)',
+                '4': 'Champion (Adult)',
+                '5': 'Ultimate (Perfect)',
+                '6': 'Mega (Ultimate)'
+            };
+            
+            return stageMap[stage] || stage;
+        }
+
+        function displayEvolutions(data) {
+            const resultSection = document.getElementById('resultSection');
+            
+            console.log('Datos recibidos:', data);
+            
+            // Verificar si existe currentDigimon
+            if (!data.currentDigimon) {
+                showError('La respuesta del servidor no tiene el formato esperado');
+                return;
+            }
+            
+            let html = `
+                <div class="current-digimon">
+                    <h2>${data.currentDigimon.name}</h2>
+                    <div class="digimon-stats">
+                        <span class="stat-badge">#${data.currentDigimon.number}</span>
+                        <span class="stat-badge">${getStageLabel(data.currentDigimon.stage)}</span>
+                        <span class="stat-badge">Attribute: ${data.currentDigimon.attribute}</span>
+                    </div>
+                </div>
+            `;
+
+            // Pre-evoluciones
+            if (data.preEvolutions && data.preEvolutions.length > 0) {
+                html += `
+                    <div class="evolution-section">
+                        <h2 class="section-title">
+                            <span class="arrow-icon">⬆️</span>
+                            Pre-Evoluciones (${data.preEvolutions.length})
+                        </h2>
+                        <div class="evolutions-grid">
+                `;
+                
+                data.preEvolutions.forEach(evolution => {
+                    html += `
+                        <div class="evolution-card" onclick="selectDigimon('${evolution.name}')" style="cursor: pointer;">
+                            <h3>${evolution.name}</h3>
+                            <div class="evolution-info">
+                                <span class="stage">${getStageLabel(evolution.stage)}</span>
+                                <span class="number">#${evolution.number}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            } else {
+                html += `
+                    <div class="evolution-section">
+                        <h2 class="section-title">
+                            <span class="arrow-icon">⬆️</span>
+                            Pre-Evoluciones
+                        </h2>
+                        <div class="empty-message">No hay pre-evoluciones disponibles</div>
+                    </div>
+                `;
+            }
+
+            // Post-evoluciones
+            if (data.postEvolutions && data.postEvolutions.length > 0) {
+                html += `
+                    <div class="evolution-section">
+                        <h2 class="section-title">
+                            <span class="arrow-icon">⬇️</span>
+                            Post-Evoluciones (${data.postEvolutions.length})
+                        </h2>
+                        <div class="evolutions-grid">
+                `;
+                
+                data.postEvolutions.forEach(evolution => {
+                    html += `
+                        <div class="evolution-card" onclick="selectDigimon('${evolution.name}')" style="cursor: pointer;">
+                            <h3>${evolution.name}</h3>
+                            <div class="evolution-info">
+                                <span class="stage">${getStageLabel(evolution.stage)}</span>
+                                <span class="number">#${evolution.number}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            } else {
+                html += `
+                    <div class="evolution-section">
+                        <h2 class="section-title">
+                            <span class="arrow-icon">⬇️</span>
+                            Post-Evoluciones
+                        </h2>
+                        <div class="empty-message">No hay post-evoluciones disponibles</div>
+                    </div>
+                `;
+            }
+
+            resultSection.innerHTML = html;
+            resultSection.classList.add('show');
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        function selectDigimon(name) {
+            document.getElementById('digimonName').value = name;
+            searchEvolutions();
+        }
+
+        document.getElementById('digimonName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchEvolutions();
+            }
+        });
+    </script>
+</body>
+</html>
