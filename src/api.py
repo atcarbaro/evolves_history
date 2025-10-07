@@ -66,7 +66,12 @@ async def startup_event():
     try:
         # Try production path first, fallback to development path
         import os
-        excel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'digimon_list.xlsx')
+        
+        # For Vercel deployment
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        excel_path = os.path.join(base_dir, '..', 'data', 'digimon_list.xlsx')
+        
+        # Fallback for local development
         if not os.path.exists(excel_path):
             excel_path = '../data/digimon_list.xlsx'
         
@@ -74,6 +79,13 @@ async def startup_event():
         print("✅ Digimon service initialized successfully")
     except Exception as e:
         print(f"❌ Error initializing service: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+# Vercel handler (required for serverless)
+from mangum import Mangum
+handler = Mangum(app)
 
 
 @app.get("/", tags=["General"])
