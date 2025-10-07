@@ -64,16 +64,14 @@ async def startup_event():
     """Initialize service on application startup"""
     global service
     try:
-        # Try production path first, fallback to development path
         import os
         
-        # For Vercel deployment
+        # Para Render deployment
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        excel_path = os.path.join(base_dir, '..', 'data', 'digimon_list.xlsx')
+        excel_path = os.path.join(base_dir, 'data', 'digimon_list.xlsx')
         
-        # Fallback for local development
-        if not os.path.exists(excel_path):
-            excel_path = 'data/digimon_list.xlsx'
+        print(f"Looking for Excel at: {excel_path}")
+        print(f"File exists: {os.path.exists(excel_path)}")
         
         service = DigimonEvolutionService(excel_path)
         print("✅ Digimon service initialized successfully")
@@ -81,6 +79,7 @@ async def startup_event():
         print(f"❌ Error initializing service: {e}")
         import traceback
         traceback.print_exc()
+        raise
 
 
 # For local development
