@@ -73,7 +73,7 @@ async def startup_event():
         
         # Fallback for local development
         if not os.path.exists(excel_path):
-            excel_path = '../data/digimon_list.xlsx'
+            excel_path = 'data/digimon_list.xlsx'
         
         service = DigimonEvolutionService(excel_path)
         print("✅ Digimon service initialized successfully")
@@ -83,9 +83,7 @@ async def startup_event():
         traceback.print_exc()
 
 
-# Vercel handler (required for serverless)
-from mangum import Mangum
-handler = Mangum(app)
+
 
 
 @app.get("/", tags=["General"])
@@ -333,3 +331,6 @@ if __name__ == "__main__":
     print(f"🔗 API available at: http://localhost:{port}\n")
     
     uvicorn.run(app, host="0.0.0.0", port=port)
+
+from mangum import Mangum
+handler = Mangum(app)
