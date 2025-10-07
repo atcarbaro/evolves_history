@@ -83,10 +83,6 @@ async def startup_event():
         traceback.print_exc()
 
 
-from mangum import Mangum
-
-handler = Mangum(app, lifespan="off")
-
 # For local development
 if __name__ == "__main__":
     import uvicorn

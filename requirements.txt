@@ -3,4 +3,3 @@ openpyxl
 pydantic
 fastapi
 uvicorn
-mangum
