@@ -83,8 +83,22 @@ async def startup_event():
         traceback.print_exc()
 
 
+from mangum import Mangum
 
+handler = Mangum(app, lifespan="off")
 
+# For local development
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    
+    port = int(os.environ.get("PORT", 8000))
+    
+    print("\n🚀 Starting Digimon Evolution API...")
+    print(f"📚 Documentation available at: http://localhost:{port}/docs")
+    print(f"🔗 API available at: http://localhost:{port}\n")
+    
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 @app.get("/", tags=["General"])
 async def root():
@@ -331,6 +345,3 @@ if __name__ == "__main__":
     print(f"🔗 API available at: http://localhost:{port}\n")
     
     uvicorn.run(app, host="0.0.0.0", port=port)
-
-from mangum import Mangum
-handler = Mangum(app)
