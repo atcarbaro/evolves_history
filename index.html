@@ -136,6 +136,36 @@
             text-transform: capitalize;
         }
 
+        .digimon-image {
+            margin-bottom: 20px;
+        }
+
+        .digimon-image img {
+            max-width: 350px;
+            max-height: 350px;
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .digimon-image img {
+                max-width: 250px;
+                max-height: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .digimon-image img {
+                max-width: 200px;
+                max-height: 200px;
+                padding: 10px;
+            }
+        }
+
         .digimon-stats {
             display: flex;
             justify-content: center;
@@ -213,6 +243,12 @@
             cursor: pointer;
             transition: all 0.2s;
             flex-shrink: 0;
+        }
+
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
         }
 
         .copy-btn:hover {
@@ -314,6 +350,7 @@
 
     <script>
         const API_URL = 'https://evolves-history.onrender.com/api/evolution';
+        const IMAGE_API_URL = 'https://digi-api.com/api/v1/digimon';
 
         async function searchEvolutions() {
             const digimonName = document.getElementById('digimonName').value.trim();
@@ -335,6 +372,7 @@
             loadingContainer.innerHTML = '<div class="loading">Cargando evoluciones</div>';
 
             try {
+                // Obtener datos de evolución
                 const response = await fetch(`${API_URL}/${digimonName}`);
                 
                 if (!response.ok) {
@@ -343,7 +381,24 @@
 
                 const data = await response.json();
                 console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
-                displayEvolutions(data);
+                
+                // Obtener imagen del Digimon
+                let imageUrl = null;
+                try {
+                    const imageResponse = await fetch(`${IMAGE_API_URL}/${digimonName}`);
+                    if (imageResponse.ok) {
+                        const imageData = await imageResponse.json();
+                        console.log('Datos de imagen:', imageData);
+                        if (imageData.images && imageData.images.length > 0) {
+                            imageUrl = imageData.images[0].href;
+                        }
+                    }
+                } catch (imageError) {
+                    console.log('No se pudo cargar la imagen:', imageError);
+                    // Continuar sin imagen
+                }
+                
+                displayEvolutions(data, imageUrl);
             } catch (error) {
                 showError(`Error al cargar las evoluciones: ${error.message}`);
             } finally {
@@ -371,7 +426,7 @@
             return stageMap[stage] || stage;
         }
 
-        function displayEvolutions(data) {
+        function displayEvolutions(data, imageUrl) {
             const resultSection = document.getElementById('resultSection');
             
             console.log('Datos recibidos:', data);
@@ -385,6 +440,11 @@
             let html = `
                 <div class="current-digimon">
                     <h2>${data.currentDigimon.name}</h2>
+                    ${imageUrl ? `
+                        <div class="digimon-image">
+                            <img src="${imageUrl}" alt="${data.currentDigimon.name}" onerror="this.style.display='none'">
+                        </div>
+                    ` : ''}
                     <div class="digimon-stats">
                         <span class="stat-badge">#${data.currentDigimon.number}</span>
                         <span class="stat-badge">${getStageLabel(data.currentDigimon.stage)}</span>
@@ -409,7 +469,9 @@
                         <div class="evolution-card" onclick="selectDigimon('${evolution.name}')">
                             <div class="card-header">
                                 <h3>${evolution.name}</h3>
-                                <button class="copy-btn" onclick="copyToClipboard(event, '${evolution.name}')">📋</button>
+                                <button class="copy-btn" onclick="copyToClipboard(event, '${evolution.name}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 448v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24V120c0-13.255 10.745-24 24-24h72v296c0 30.879 25.121 56 56 56h168zm0-344V0H152c-13.255 0-24 10.745-24 24v368c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24V128H344c-13.2 0-24-10.8-24-24zm120.971-31.029L375.029 7.029A24 24 0 0 0 358.059 0H352v96h96v-6.059a24 24 0 0 0-7.029-16.97z"/></svg>
+                                </button>
                             </div>
                             <div class="evolution-info">
                                 <span class="stage">${getStageLabel(evolution.stage)}</span>
@@ -448,7 +510,9 @@
                         <div class="evolution-card" onclick="selectDigimon('${evolution.name}')">
                             <div class="card-header">
                                 <h3>${evolution.name}</h3>
-                                <button class="copy-btn" onclick="copyToClipboard(event, '${evolution.name}')">📋</button>
+                                <button class="copy-btn" onclick="copyToClipboard(event, '${evolution.name}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 448v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24V120c0-13.255 10.745-24 24-24h72v296c0 30.879 25.121 56 56 56h168zm0-344V0H152c-13.255 0-24 10.745-24 24v368c0 13.255 10.745 24 24 24h272c13.255 0 24-10.745 24-24V128H344c-13.2 0-24-10.8-24-24zm120.971-31.029L375.029 7.029A24 24 0 0 0 358.059 0H352v96h96v-6.059a24 24 0 0 0-7.029-16.97z"/></svg>
+                                </button>
                             </div>
                             <div class="evolution-info">
                                 <span class="stage">${getStageLabel(evolution.stage)}</span>
@@ -494,7 +558,7 @@
                 // Cambiar el texto del botón temporalmente
                 const btn = event.target;
                 const originalText = btn.innerHTML;
-                btn.innerHTML = '✓ Copiado';
+                btn.innerHTML = '✓';
                 btn.classList.add('copied');
                 
                 setTimeout(() => {
