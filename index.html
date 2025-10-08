@@ -48,6 +48,16 @@
             margin-bottom: 20px;
         }
 
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+
         input[type="text"] {
             flex: 1;
             padding: 15px 20px;
@@ -184,6 +194,38 @@
             color: #667eea;
             font-size: 1.5em;
             margin-bottom: 10px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .copy-btn {
+            padding: 8px 12px;
+            font-size: 0.85em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
         }
 
         .evolution-info {
@@ -364,8 +406,11 @@
                 
                 data.preEvolutions.forEach(evolution => {
                     html += `
-                        <div class="evolution-card" onclick="selectDigimon('${evolution.name}')" style="cursor: pointer;">
-                            <h3>${evolution.name}</h3>
+                        <div class="evolution-card" onclick="selectDigimon('${evolution.name}')">
+                            <div class="card-header">
+                                <h3>${evolution.name}</h3>
+                                <button class="copy-btn" onclick="copyToClipboard(event, '${evolution.name}')">📋</button>
+                            </div>
                             <div class="evolution-info">
                                 <span class="stage">${getStageLabel(evolution.stage)}</span>
                                 <span class="number">#${evolution.number}</span>
@@ -400,8 +445,11 @@
                 
                 data.postEvolutions.forEach(evolution => {
                     html += `
-                        <div class="evolution-card" onclick="selectDigimon('${evolution.name}')" style="cursor: pointer;">
-                            <h3>${evolution.name}</h3>
+                        <div class="evolution-card" onclick="selectDigimon('${evolution.name}')">
+                            <div class="card-header">
+                                <h3>${evolution.name}</h3>
+                                <button class="copy-btn" onclick="copyToClipboard(event, '${evolution.name}')">📋</button>
+                            </div>
                             <div class="evolution-info">
                                 <span class="stage">${getStageLabel(evolution.stage)}</span>
                                 <span class="number">#${evolution.number}</span>
@@ -435,6 +483,28 @@
         function selectDigimon(name) {
             document.getElementById('digimonName').value = name;
             searchEvolutions();
+        }
+
+        function copyToClipboard(event, text) {
+            // Prevenir que el click se propague al card
+            event.stopPropagation();
+            
+            // Copiar al clipboard
+            navigator.clipboard.writeText(text).then(() => {
+                // Cambiar el texto del botón temporalmente
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✓ Copiado';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('copied');
+                }, 1500);
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('No se pudo copiar al portapapeles');
+            });
         }
 
         document.getElementById('digimonName').addEventListener('keypress', function(e) {
